@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: homecoming
+    runtime: docker
+    envVars:
+      - {key: QLOO_API_KEY, sync: false}
+      - {key: OPENCODE_API_KEY, sync: false}
