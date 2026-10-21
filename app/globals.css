@@ -1,0 +1,14 @@
+@tailwind base;@tailwind components;@tailwind utilities;
+:root{--bg:#F4F0E8;--surface:#FFFDF8;--surface-alt:#EADFCB;--border:#DDD3C2;--border-input:#7C7566;--text:#1E2433;--text-muted:#555B6B;--accent:#0F6B5E;--on-accent:#fff;--ink-bg:#17202E;--on-ink:#F4F0E8;--on-ink-muted:#B9C0CE;--highlight:#E8A33D;--danger:#B3261E}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{background:var(--bg);color:var(--text);font-family:Figtree,system-ui,sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
+.on-ink :focus-visible{outline-color:var(--highlight)}
+.display{font-family:Fraunces,Georgia,serif;font-weight:400;letter-spacing:-.02em;font-variation-settings:"SOFT" 100,"opsz" 144}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes settle{from{opacity:0;transform:translateY(24px) rotate(var(--r0))}to{opacity:1;transform:rotate(var(--r))}}
+@keyframes draw{to{stroke-dashoffset:0}}
+.rise{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+.settle{animation:settle .9s cubic-bezier(.2,.7,.2,1) both}
+.draw{stroke-dasharray:6 8;animation:fade 1.2s .7s both}@keyframes fade{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){*,*:before{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
