@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Homecoming: your taste, in a new city</title>
+<style>:root{--bg:#f7f3ee;--ink:#1f2430;--acc:#d9482b;--card:#fff;--mut:#6b7280;--ln:#ddd5ca}
+body{margin:0;font:17px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink)}main{max-width:820px;margin:auto;padding:30px 18px 70px}
+h1{font:700 2.3rem Georgia,serif;margin:.1em 0}.s{color:var(--mut)}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:140px}
+input,select{font:inherit;padding:11px;border:1.5px solid var(--ln);border-radius:10px;background:var(--card);color:var(--ink);box-sizing:border-box}
+button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:12px 20px;background:var(--acc);color:#fff;cursor:pointer}button.g{background:none;color:var(--acc);border:1.5px solid var(--acc)}
+.item{display:grid;grid-template-columns:130px 1fr;gap:10px;margin-top:10px}.pair{background:var(--card);border-radius:14px;padding:16px;margin-top:16px;box-shadow:0 1px 4px #0001}
+.from{font-size:.85rem;color:var(--mut)}.m{padding:10px 0;border-top:1px solid var(--ln)}.t{display:inline-block;font-size:.78rem;background:#fbe3dc;border-radius:6px;padding:1px 8px;margin:2px 4px 0 0}
+.bar{height:5px;background:#eee;border-radius:3px;margin-top:6px}.bar i{display:block;height:5px;background:var(--acc);border-radius:3px}
+.guide{background:#1f2430;color:#fff;border-radius:14px;padding:18px;margin-top:20px}@media(prefers-color-scheme:dark){:root{--bg:#14161c;--ink:#eee;--card:#1e222b;--ln:#343a46;--mut:#9aa3b2}.t{background:#4a2a22}}</style></head><body><main>
+<h1>Homecoming</h1><p class="s">Moved somewhere new? Tell us what you loved back home. Qloo's taste graph finds what people with your taste love where you are now, and shows exactly what you share.</p>
+<div class="row"><input id="home" placeholder="City you left" value="Pune"><input id="new" placeholder="City you moved to" value="Toronto"></div>
+<div id="items"></div><div class="row" style="margin-top:12px"><button class="g" onclick="add()">+ Add another favourite</button><button onclick="go()">Translate my taste</button></div><div id="out"></div></main>
+<script>
+const $=i=>document.getElementById(i),esc=s=>String(s??"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function add(n="",k="place"){const d=document.createElement("div");d.className="item";d.innerHTML=`<select><option value="place">Place</option><option value="artist">Artist</option><option value="movie">Film</option></select><input placeholder="e.g. a café, band or film you love" value="${esc(n)}">`;d.firstChild.value=k;$("items").append(d)}
+add("German Bakery","place");
+async function go(){const o=$("out");o.innerHTML="<p>Translating…</p>";
+const loves=[...document.querySelectorAll(".item")].map(d=>({kind:d.children[0].value,name:d.children[1].value.trim()})).filter(l=>l.name);
+try{const r=await(await fetch("/api/translate",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({home:$("home").value,new:$("new").value,loves})})).json();
+if(r.error){o.innerHTML=`<p>${esc(r.error)}</p>`;return}
+let h=r.mode=="demo"?"<p class='s'>Demo mode with sample data. Set QLOO_API_KEY for live results.</p>":"";
+if(r.guide)h+=`<div class="guide"><b>Your first weeks in ${esc($("new").value)}</b><p>${esc(r.guide.intro)}</p><ol>${(r.guide.first_week||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`;
+r.pairs.forEach(p=>{h+=`<div class="pair"><div class="from">Back home you loved</div><b>${esc(p.from.name)}</b>`;
+if(!p.matches.length)h+="<p class='s'>No matches found.</p>";
+p.matches.forEach(m=>h+=`<div class="m">→ <b>${esc(m.name)}</b> <span class="from">${esc(m.address)}</span><div>${(m.shared||[]).map(t=>`<span class="t">${esc(t)}</span>`).join("")}</div>${m.jev!=null?`<span class="t" style="background:var(--acc);color:#fff">Jev fit ${Math.round(m.jev*100)}%</span>`:""}${m.affinity!=null?`<div class="bar"><i style="width:${Math.round(m.affinity*100)}%"></i></div>`:""}</div>`);h+="</div>"});
+o.innerHTML=h}catch(e){o.innerHTML="<p>Something went wrong. Please try again.</p>"}}
+</script></body></html>
