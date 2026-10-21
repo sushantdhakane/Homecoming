@@ -5,7 +5,7 @@ Front end for Homecoming. It talks to the FastAPI backend in `../homecoming` (Ql
 ## Run locally
 ```
 # terminal 1: backend (see ../homecoming/README.md)
-cd ../homecoming && uvicorn app:app --reload
+cd "../homecoming backend" && uvicorn app:app --reload
 # terminal 2: this app
 npm install
 npm run dev        # http://localhost:3000
