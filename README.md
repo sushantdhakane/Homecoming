@@ -131,7 +131,6 @@ The interface follows a small design system in `homecoming-web/design/tokens.jso
 - Jev scores from Qloo's tag lists, not from the venues themselves. Treat the score as a grounded closeness estimate, not a review.
 - Match quality depends on how well Qloo can resolve the favourite. Full names with the city work best.
 - The free Jev and Nemotron tiers can be rate limited. If they fail, the app still shows the Qloo matches and shared tags.
-- A backend on a free host may take about a minute to wake up on the first request.
 
 ## Acknowledgements
 
