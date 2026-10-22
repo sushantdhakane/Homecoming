@@ -4,6 +4,7 @@ export default function Results({ r, home, city }: { r: Result; home: string; ci
   return (
     <div className="mt-12 space-y-10">
       {r.mode === "demo" && <p className="rounded-md bg-alt px-4 py-3 text-[15px]">This is sample data. Add a Qloo key on the server to see real matches.</p>}
+      {!r.guide && r.mode !== "demo" && r.guide_error && <p className="rounded-md bg-alt px-4 py-3 text-[15px]">The first-weeks plan couldn't be written this time ({r.guide_error}). Your matches below are unaffected.</p>}
       {r.guide && (
         <section className="rise rounded-lg bg-accent p-7 text-onaccent sm:p-9">
           <h3 className="display text-3xl">Your first weeks in {city}</h3>
@@ -26,7 +27,7 @@ export default function Results({ r, home, city }: { r: Result; home: string; ci
                     {pc != null && <div className="text-center" title={m.jev != null ? "Jev fit score" : "Qloo taste affinity"}>
                       <div className="grid h-14 w-14 place-items-center rounded-full" style={{ background: `conic-gradient(var(--accent) ${pc}%, var(--border) 0)` }}>
                         <span className="grid h-11 w-11 place-items-center rounded-full bg-surface text-[15px] font-bold">{pc}</span></div>
-                      <span className="text-xs text-muted">{m.jev != null ? "fit" : "taste"}</span></div>}
+                      <span className="text-xs font-medium text-muted">{pc >= 70 ? "strong match" : pc >= 45 ? "good match" : "loose match"}</span></div>}
                   </div>
                   {m.address && <p className="mt-1 text-sm text-muted">{m.address}</p>}
                   {!!m.shared?.length && <div className="mt-auto pt-4"><p className="mb-1.5 text-sm text-muted">You both share</p>
