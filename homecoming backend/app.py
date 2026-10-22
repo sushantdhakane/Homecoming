@@ -121,15 +121,27 @@ async def guide(pairs, home, new):
               '{"intro":str,"first_week":[str,str,str]} where first_week items are concrete suggestions naming matches.')
     async with httpx.AsyncClient() as c:
         r = await c.post(LLM_URL.rstrip("/") + "/chat/completions", timeout=90,
-            headers={"Authorization": f"Bearer {LLM_KEY}"},
+            headers={"Authorization": f"Bearer {LLM_KEY}", "Content-Type": "application/json", "Accept": "application/json",
+                     "User-Agent": "Mozilla/5.0 (compatible; Homecoming/1.0; +https://github.com/sushantdhakane/Homecoming)"},
             json={"model": MODEL, "max_tokens": 2000 if THINKING == "1" else 900, "temperature": 0.6, "top_p": 0.95,
                   **({"chat_template_kwargs": {"enable_thinking": THINKING == "1"}} if THINKING is not None else {}),
                   "messages": [{"role": "system", "content": system},
                                {"role": "user", "content": json.dumps({"from": home, "to": new, "pairs": pairs})}]})
-        r.raise_for_status()
+        if r.status_code >= 400:   # surface the host's own message instead of a bare status
+            raise RuntimeError(f"LLM {r.status_code}: {r.text[:160]}")
         t = r.json()["choices"][0]["message"]["content"] or ""
         t = re.sub(r"<think>.*?</think>", "", t, flags=re.S)   # drop reasoning traces if the model emits them
         return json.loads(re.search(r"\{.*\}", t, re.S).group(0))
+
+VERB = {"place": "Go to", "artist": "Put on", "movie": "Watch"}
+def template_guide(pairs, new):
+    """No-LLM fallback: a plan assembled only from the matches and tags already found, so nothing can be invented."""
+    picks = [(p, m) for i in range(3) for p in pairs for m in p["matches"][i:i + 1]][:3]
+    steps = []
+    for p, m in picks:
+        sh = ", ".join(m.get("shared", [])[:3])
+        steps.append(f"{VERB.get(p['from']['kind'], 'Try')} {m['name']}, a match for {p['from']['name']}" + (f" (you both share: {sh})." if sh else "."))
+    return {"intro": f"A gentle way to start feeling at home in {new}, built from what you loved back home.", "first_week": steps}
 
 def demo(req):
     return {"mode": "demo", "pairs": [{"from": {"name": l.name, "kind": l.kind, "tags": ["cozy", "indie"]},
@@ -156,7 +168,9 @@ async def api(req: Req):
             brief = [{"loved": p["from"]["name"], "matches": [{"name": m["name"], "shared": m["shared"]} for m in p["matches"]]} for p in pairs]
             out["guide"] = await guide(brief, req.home, req.new)
         except Exception as e:
-            out["guide_error"] = str(e)[:100]
+            out["guide_error"] = str(e)[:240]
+    if "guide" not in out and any(p["matches"] for p in pairs):
+        out["guide"], out["guide_source"] = template_guide(pairs, req.new), "template"
     return out
 
 @app.get("/healthz")
