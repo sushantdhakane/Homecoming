@@ -4,14 +4,6 @@ export default function Results({ r, home, city }: { r: Result; home: string; ci
   return (
     <div className="mt-12 space-y-10">
       {r.mode === "demo" && <p className="rounded-md bg-alt px-4 py-3 text-[15px]">This is sample data. Add a Qloo key on the server to see real matches.</p>}
-      {!r.guide && r.mode !== "demo" && r.guide_error && <p className="rounded-md bg-alt px-4 py-3 text-[15px]">The first-weeks plan couldn't be written this time ({r.guide_error}). Your matches below are unaffected.</p>}
-      {r.guide && (
-        <section className="rise rounded-lg bg-accent p-7 text-onaccent sm:p-9">
-          <h3 className="display text-3xl">Your first weeks in {city}</h3>
-          <p className="mt-2 max-w-2xl opacity-95">{r.guide.intro}</p>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-3">{r.guide.first_week?.map((x, i) => <li key={i} className="rounded-md bg-white/10 p-4 text-[15px] leading-snug ring-1 ring-white/25">{x}</li>)}</ul>
-        </section>
-      )}
       {r.pairs.map((p, i) => (
         <section key={i}>
           <div className="mb-4 flex flex-wrap items-baseline gap-x-3"><h3 className="display text-3xl">{p.from.name}</h3>
@@ -37,6 +29,14 @@ export default function Results({ r, home, city }: { r: Result; home: string; ci
           </div>
         </section>
       ))}
+      {!r.guide && r.mode !== "demo" && r.guide_error && <p className="rounded-md bg-alt px-4 py-3 text-[15px]">The first-weeks plan couldn't be written this time ({r.guide_error}). Your matches below are unaffected.</p>}
+      {r.guide && (
+        <section className="rise rounded-lg bg-accent p-7 text-onaccent sm:p-9">
+          <h3 className="display text-3xl">Your first weeks in {city}</h3>
+          <p className="mt-2 max-w-2xl opacity-95">{r.guide.intro}</p>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-3">{r.guide.first_week?.map((x, i) => <li key={i} className="rounded-md bg-white/10 p-4 text-[15px] leading-snug ring-1 ring-white/25">{x}</li>)}</ul>
+        </section>
+      )}
       <p className="display pt-6 text-center text-3xl sm:text-4xl">Now close the tab. {city} is waiting.</p>
     </div>
   );
