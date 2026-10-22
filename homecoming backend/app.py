@@ -50,11 +50,22 @@ def ents(j):
     r = j.get("results")
     return (r.get("entities") if isinstance(r, dict) else r) or []
 
+NOISE = {"restroom", "place", "destination", "restaurant", "central"}
+def clean_tags(tags):
+    """Drop duplicates, age-bracket tags ("18 24") and generic place tags that say nothing about taste."""
+    seen, out = set(), []
+    for t in tags:
+        k = t.strip().lower()
+        if not k or k in seen or k in NOISE or re.fullmatch(r"\d{1,2}( \d{1,2})?\+?", k):
+            continue
+        seen.add(k); out.append(t.strip())
+    return out
+
 def slim(e):
     return {"name": e.get("name"), "id": e.get("entity_id"),
             "affinity": (e.get("query") or {}).get("affinity"),
             "address": (e.get("properties") or {}).get("address", ""),
-            "tags": [t.get("name") for t in e.get("tags", []) if t.get("name")]}
+            "tags": clean_tags([t.get("name") for t in e.get("tags", []) if t.get("name")])}
 
 async def resolve(c, love, home):
     # places are searched with the home city so "Blue Door" finds YOUR Blue Door
@@ -67,7 +78,7 @@ async def resolve(c, love, home):
 
 async def translate(c, src, new):
     """One home favourite -> its closest taste-equivalents in the new city."""
-    p = {"signal.interests.entities": src["id"], "take": 3}
+    p = {"signal.interests.entities": src["id"], "take": 8}
     if src["kind"] == "place":
         p.update({"filter.type": "urn:entity:place", "filter.location.query": new})
     else:   # music/film have no address: ask what the NEW CITY's audience loves that fits
@@ -99,6 +110,8 @@ def jev_rescore(pair, new):
         for i, m in enumerate(ms):
             m["jev"] = round((r.answers[f"m{i}_vibe"].noul + r.answers[f"m{i}_role"].noul) / 2, 2)
         pair["matches"].sort(key=lambda m: m.get("jev", -1), reverse=True)
+        strong = [m for m in pair["matches"] if m.get("jev", 0) >= 0.3]
+        pair["matches"] = (strong or pair["matches"])[:3]   # drop weak matches, but never return nothing
     except Exception:
         pass   # Jev is an enhancement; Qloo results still stand
 
@@ -133,8 +146,10 @@ async def api(req: Req):
             return {"error": "Qloo couldn't find any of those. Try fuller names."}
         res = await asyncio.gather(*[translate(c, s, req.new) for s in srcs])
     pairs = [{"from": s, "matches": m} for s, m in zip(srcs, res)]
-    if JEV:
+    if JEV:   # Jev sees all 8 candidates and keeps the best 3
         await asyncio.gather(*[asyncio.to_thread(jev_rescore, p, req.new) for p in pairs])
+    for p in pairs:   # also covers "no Jev" and "Jev call failed"
+        p["matches"] = p["matches"][:3]
     out = {"mode": "live", "jev": JEV, "pairs": pairs}
     if LLM_KEY:
         try:
