@@ -6,7 +6,7 @@ Homecoming helps people who move to a new city rebuild their sense of what's goo
 
 Built for the Qloo LLM Hackathon.
 
-**Live demo:** _add your Vercel URL here_
+**Live demo:** https://homecoming-web.vercel.app/
 
 ---
 
