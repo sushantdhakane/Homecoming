@@ -62,7 +62,7 @@ export default function Page() {
         </section>
       </main>
       <footer className="mx-auto flex max-w-page flex-wrap justify-between gap-3 border-t border-line px-6 py-8 text-sm text-muted">
-        <span>Matches by Qloo’s taste graph. Fit scores by Jev.</span><span>Homecoming · MIT licensed</span>
+        <span>Matches by Qloo’s taste graph. Fit scores by Jev.</span><span>Developed by <a href="https://www.linkedin.com/in/sushant-dhakane-6651871b4/" className="font-medium text-ink underline underline-offset-4 hover:text-accent" target="_blank" rel="noopener noreferrer">Sushant Dhakane</a> · MIT licensed</span>
       </footer>
     </>
   );
