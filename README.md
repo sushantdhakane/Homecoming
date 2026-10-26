@@ -4,8 +4,6 @@
 
 Homecoming helps people who move to a new city rebuild their sense of what's good. Name a café, band or film you loved back home, and Homecoming finds what people with your taste love in your new city, shows the traits you share, and gives each match a fit score.
 
-Built for the Qloo LLM Hackathon.
-
 **Live demo:** https://homecoming-web.vercel.app/
 
 ---
